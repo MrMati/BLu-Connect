@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_retry">Retry</string>
+
+    <string name="blu_led">LED</string>
+    <string name="blu_led_descr">Switch to toggle the LED</string>
+
+    <string name="blu_button">Button</string>
+    <string name="blu_button_descr">The button state</string>
+    <string name="blu_on">ON</string>
+    <string name="blu_off">OFF</string>
+
+    <string name="scanner_title">BLu Connect</string>
+</resources>
