@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "pl.mati.blu.serialization";
+option java_multiple_files = true;
+
+message SetLed {
+    // don't set color to default value (zero)
+    // because it allows serializer to completely omit this message when used in MainHostMsg
+    uint32 color = 1;
+}
+
+

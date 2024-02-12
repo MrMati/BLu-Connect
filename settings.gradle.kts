@@ -27,6 +27,7 @@ include(":scanner")
 include(":blu:spec")
 include(":blu:ui")
 include(":blu:ble")
+include(":blu:serialization")
 
 if (file("../Android-Common-Libraries").exists()) {
     includeBuild("../Android-Common-Libraries")

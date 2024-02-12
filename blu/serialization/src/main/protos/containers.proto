@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_package = "pl.mati.blu.serialization";
+option java_multiple_files = true;
+
+import "manual.proto";
+import "main_host.proto";
+import "main_node.proto";
+
+message MainHostMsg {
+    oneof content {
+        SetLed set_led = 1;
+        GetReading get_reading = 2;
+        SetSensorOptions set_sensor_options = 3;
+        SetAutoOptions  set_auto_options = 4; 
+        SubscribeReading subscribe_reading = 5;
+    }
+}
+
+
+message MainNodeMsg {
+    bool is_subscription_response = 1;
+    oneof content {
+        ReadingResponse reading_response = 2;
+    }
+    
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "pl.mati.blu.serialization";
+option java_multiple_files = true;
+
+message ReadingResponse {
+    uint32 raw_reading = 1;
+    float scaled_reading = 2;
+}

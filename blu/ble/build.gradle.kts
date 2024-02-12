@@ -11,6 +11,7 @@ android {
 
 dependencies {
     implementation(project(":blu:spec"))
+    implementation(project(":blu:serialization"))
 
     // Import BLE Library
     implementation(libs.nordic.ble.ktx)
@@ -18,4 +19,6 @@ dependencies {
     implementation(libs.timber)
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
+
+    implementation(libs.protobuf.kotlin.lite)
 }

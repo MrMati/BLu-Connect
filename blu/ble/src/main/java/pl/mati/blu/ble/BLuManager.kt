@@ -32,8 +32,8 @@ private class BLuManagerImpl(
 ): BleManager(context), BLuControl {
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private var ledCharacteristic: BluetoothGattCharacteristic? = null
-    private var buttonCharacteristic: BluetoothGattCharacteristic? = null
+    private var hostOut: BluetoothGattCharacteristic? = null
+    private var hostIn: BluetoothGattCharacteristic? = null
 
     private val _ledState = MutableStateFlow(false)
     override val ledState = _ledState.asStateFlow()
@@ -94,7 +94,7 @@ private class BLuManagerImpl(
     override suspend fun turnLed(state: Boolean) {
         // Write the value to the characteristic.
         writeCharacteristic(
-            ledCharacteristic,
+            hostOut,
             LedData.from(state),
             BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).suspend()
@@ -117,7 +117,7 @@ private class BLuManagerImpl(
         // Get the LBS Service from the gatt object.
         gatt.getService(BLuSpec.BLU_SERVICE_UUID)?.apply {
             // Get the LED characteristic.
-            ledCharacteristic = getCharacteristic(
+            hostOut = getCharacteristic(
                 BLuSpec.BLU_DATA_HOST_OUT_UUID,
                 // Mind, that below we pass required properties.
                 // If your implementation supports only WRITE_NO_RESPONSE,
@@ -125,21 +125,20 @@ private class BLuManagerImpl(
                 BluetoothGattCharacteristic.PROPERTY_WRITE
             )
             // Get the Button characteristic.
-            buttonCharacteristic = getCharacteristic(
+            hostIn = getCharacteristic(
                 BLuSpec.BLU_DATA_HOST_IN_UUID,
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY
             )
 
             // Return true if all required characteristics are supported.
-            return ledCharacteristic != null && buttonCharacteristic != null
+            return hostOut != null && hostIn != null
         }
         return false
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override fun initialize() {
         // Enable notifications for the button characteristic.
-        val flow: Flow<ButtonState> = setNotificationCallback(buttonCharacteristic)
+        val flow: Flow<ButtonState> = setNotificationCallback(hostIn)
             .asValidResponseFlow()
 
         // Forward the button state to the buttonState flow.
@@ -147,22 +146,22 @@ private class BLuManagerImpl(
             flow.map { it.state }.collect { _buttonState.tryEmit(it) }
         }
 
-        enableNotifications(buttonCharacteristic)
+        enableNotifications(hostIn)
             .enqueue()
 
         // Read the initial value of the button characteristic.
-        readCharacteristic(buttonCharacteristic)
+        readCharacteristic(hostIn)
             .with(buttonCallback)
             .enqueue()
 
         // Read the initial value of the LED characteristic.
-        readCharacteristic(ledCharacteristic)
-            .with(ledCallback)
-            .enqueue()
+        //readCharacteristic(hostOut)
+        //    .with(ledCallback)
+        //    .enqueue()
     }
 
     override fun onServicesInvalidated() {
-        ledCharacteristic = null
-        buttonCharacteristic = null
+        hostOut = null
+        hostIn = null
     }
 }
