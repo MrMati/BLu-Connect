@@ -1,5 +1,10 @@
 package pl.mati.blu.ui.control.view
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,18 +16,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
+import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
+import com.patrykandpatrick.vico.compose.chart.Chart
+import com.patrykandpatrick.vico.compose.chart.line.lineChart
+import com.patrykandpatrick.vico.core.entry.entryModelOf
 import pl.mati.blu.ui.R
 import no.nordicsemi.android.common.theme.NordicTheme
 
 @Composable
-internal fun ButtonControlView(
-    state: Boolean,
+internal fun SensorReadingView(
+    state: Float,
     modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
@@ -44,7 +56,7 @@ internal fun ButtonControlView(
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                 )
                 Text(
-                    text = stringResource(R.string.blu_button),
+                    text = stringResource(R.string.blu_sensor),
                     style = MaterialTheme.typography.headlineMedium,
                 )
             }
@@ -55,12 +67,29 @@ internal fun ButtonControlView(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(R.string.blu_button_descr),
+                    text = stringResource(R.string.blu_sensor_descr),
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = if (state) stringResource(R.string.blu_on) else stringResource(R.string.blu_off),
+                    text = state.toString(),
                 )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+
+
+                val chartEntryModel = entryModelOf(4f, 12f, 8f, 16f)
+                Chart(
+                    chart = lineChart(),
+                    model = chartEntryModel,
+                    startAxis = rememberStartAxis(),
+                    bottomAxis = rememberBottomAxis()
+                )
+
             }
         }
     }
@@ -68,10 +97,10 @@ internal fun ButtonControlView(
 
 @Composable
 @Preview
-private fun ButtonControlViewPreview() {
+private fun SensorReadingViewPreview() {
     NordicTheme {
-        ButtonControlView(
-            state = true,
+        SensorReadingView(
+            state = 1.0F,
             modifier = Modifier.padding(16.dp),
         )
     }

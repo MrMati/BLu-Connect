@@ -60,11 +60,11 @@ internal fun BLuControlScreen(
                 }
                 BLuControl.State.READY -> {
                     val ledState by viewModel.ledState.collectAsStateWithLifecycle()
-                    val buttonState by viewModel.buttonState.collectAsStateWithLifecycle()
+                    val sensorState by viewModel.sensorState.collectAsStateWithLifecycle()
 
                     BLuControlView(
                         ledState = ledState,
-                        buttonState = buttonState,
+                        sensorReadingState = sensorState,
                         onStateChanged = { viewModel.turnLed(it) },
                         modifier = Modifier
                             .widthIn(max = 460.dp)

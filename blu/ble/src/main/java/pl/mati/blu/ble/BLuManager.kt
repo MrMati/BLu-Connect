@@ -13,10 +13,11 @@ import no.nordicsemi.android.ble.ktx.getCharacteristic
 import no.nordicsemi.android.ble.ktx.state.ConnectionState
 import no.nordicsemi.android.ble.ktx.stateAsFlow
 import no.nordicsemi.android.ble.ktx.suspend
-import pl.mati.blu.ble.data.ButtonCallback
-import pl.mati.blu.ble.data.ButtonState
-import pl.mati.blu.ble.data.LedCallback
-import pl.mati.blu.ble.data.LedData
+import pl.mati.blu.ble.data.NodeMsgCallback
+import pl.mati.blu.ble.data.SensorReading
+import pl.mati.blu.ble.data.MainMsg
+import pl.mati.blu.serialization.setLed
+import pl.mati.blu.serialization.subscribeReading
 import pl.mati.blu.spec.BLuControl
 import pl.mati.blu.spec.BLuSpec
 import timber.log.Timber
@@ -24,12 +25,12 @@ import timber.log.Timber
 class BLuManager(
     context: Context,
     device: BluetoothDevice
-): BLuControl by BLuManagerImpl(context, device)
+) : BLuControl by BLuManagerImpl(context, device)
 
 private class BLuManagerImpl(
     context: Context,
     private val device: BluetoothDevice,
-): BleManager(context), BLuControl {
+) : BleManager(context), BLuControl {
     private val scope = CoroutineScope(Dispatchers.IO)
 
     private var hostOut: BluetoothGattCharacteristic? = null
@@ -38,14 +39,15 @@ private class BLuManagerImpl(
     private val _ledState = MutableStateFlow(false)
     override val ledState = _ledState.asStateFlow()
 
-    private val _buttonState = MutableStateFlow(false)
-    override val buttonState = _buttonState.asStateFlow()
+    private val _sensorState = MutableStateFlow(0.0F)
+    override val sensorState = _sensorState.asStateFlow()
 
     override val state = stateAsFlow()
         .map {
             when (it) {
                 is ConnectionState.Connecting,
                 is ConnectionState.Initializing -> BLuControl.State.LOADING
+
                 is ConnectionState.Ready -> BLuControl.State.READY
                 is ConnectionState.Disconnecting,
                 is ConnectionState.Disconnected -> BLuControl.State.NOT_AVAILABLE
@@ -54,21 +56,18 @@ private class BLuManagerImpl(
         .stateIn(scope, SharingStarted.Lazily, BLuControl.State.NOT_AVAILABLE)
 
 
-    private val buttonCallback by lazy {
-        object : ButtonCallback() {
-            override fun onButtonStateChanged(device: BluetoothDevice, state: Boolean) {
-                _buttonState.tryEmit(state)
+    private val dataInCallback by lazy {
+        object : NodeMsgCallback() {
+            override fun onSensorStateChanged(
+                device: BluetoothDevice,
+                rawReading: Int,
+                scaledReading: Float
+            ) {
+                _sensorState.tryEmit(scaledReading)
             }
         }
     }
 
-    private val ledCallback by lazy {
-        object : LedCallback() {
-            override fun onLedStateChanged(device: BluetoothDevice, state: Boolean) {
-                _ledState.tryEmit(state)
-            }
-        }
-    }
 
     override suspend fun connect() = connect(device)
         .retry(3, 300)
@@ -92,10 +91,12 @@ private class BLuManagerImpl(
     }
 
     override suspend fun turnLed(state: Boolean) {
+        val msg = setLed { color = if (state) 0xFFFFFFFF.toInt() else 0x01 }
+
         // Write the value to the characteristic.
         writeCharacteristic(
             hostOut,
-            LedData.from(state),
+            MainMsg.hostMsgSerialize(msg),
             BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         ).suspend()
 
@@ -114,9 +115,8 @@ private class BLuManagerImpl(
     }
 
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-        // Get the LBS Service from the gatt object.
         gatt.getService(BLuSpec.BLU_SERVICE_UUID)?.apply {
-            // Get the LED characteristic.
+
             hostOut = getCharacteristic(
                 BLuSpec.BLU_DATA_HOST_OUT_UUID,
                 // Mind, that below we pass required properties.
@@ -124,7 +124,7 @@ private class BLuManagerImpl(
                 // change the property to BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE.
                 BluetoothGattCharacteristic.PROPERTY_WRITE
             )
-            // Get the Button characteristic.
+
             hostIn = getCharacteristic(
                 BLuSpec.BLU_DATA_HOST_IN_UUID,
                 BluetoothGattCharacteristic.PROPERTY_NOTIFY
@@ -137,27 +137,33 @@ private class BLuManagerImpl(
     }
 
     override fun initialize() {
-        // Enable notifications for the button characteristic.
-        val flow: Flow<ButtonState> = setNotificationCallback(hostIn)
+        val flow: Flow<SensorReading> = setNotificationCallback(hostIn)
+            //.with(dataInCallback)
             .asValidResponseFlow()
 
-        // Forward the button state to the buttonState flow.
+        // Forward the sensor state to the sensorState flow.
         scope.launch {
-            flow.map { it.state }.collect { _buttonState.tryEmit(it) }
+            flow.map { it.state }.collect { _sensorState.tryEmit(it) }
         }
+
 
         enableNotifications(hostIn)
             .enqueue()
 
-        // Read the initial value of the button characteristic.
-        readCharacteristic(hostIn)
-            .with(buttonCallback)
-            .enqueue()
 
-        // Read the initial value of the LED characteristic.
-        //readCharacteristic(hostOut)
-        //    .with(ledCallback)
-        //    .enqueue()
+        //val reqRead = getReading { numSamples = 1 }
+        val reqRead = subscribeReading {
+            enable = true
+            updateRate = 1
+        }
+
+        scope.launch {
+            writeCharacteristic(
+                hostOut,
+                MainMsg.hostMsgSerialize(reqRead),
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ).suspend()
+        }
     }
 
     override fun onServicesInvalidated() {

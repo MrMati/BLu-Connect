@@ -31,9 +31,9 @@ interface BLuControl {
     val ledState: StateFlow<Boolean>
 
     /**
-     * The current state of the button.
+     * The current state of the sensor.
      */
-    val buttonState: StateFlow<Boolean>
+    val sensorState: StateFlow<Float>
 
     /**
      * Controls the LED state.

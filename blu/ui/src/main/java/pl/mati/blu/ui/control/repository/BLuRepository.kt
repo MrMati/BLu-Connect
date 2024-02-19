@@ -24,7 +24,7 @@ class BLuRepository @Inject constructor(
     @Named("deviceId") deviceId: String,
     @Named("deviceName") deviceName: String,
     private val blu: BLuControl,
-): BLuControl by blu {
+) : BLuControl by blu {
     /** Timber tree that logs to nRF Logger. */
     private val tree: Timber.Tree
 
@@ -45,19 +45,17 @@ class BLuRepository @Inject constructor(
             // https://github.com/NordicSemiconductor/nRF-Logger-API/blob/f90d5834c46cc2057b6a9f39dcbb8f2f2dd45d56/log-timber/src/main/java/no/nordicsemi/android/log/timber/nRFLoggerTree.java#L104
             // However, in order to log in nRF Logger on APPLICATION level, we need to use
             // that level explicitly.
-            when(it) {
+            when (it) {
                 true -> Timber.log(LogContract.Log.Level.APPLICATION, "LED turned ON")
                 false -> Timber.log(LogContract.Log.Level.APPLICATION, "LED turned OFF")
             }
         }
 
-    val loggedButtonState: Flow<Boolean>
-        get() = blu.buttonState.onEach {
-            // The same applies here.
-            when(it) {
-                true -> Timber.log(LogContract.Log.Level.APPLICATION, "Button pressed")
-                false -> Timber.log(LogContract.Log.Level.APPLICATION, "Button released")
-            }
+    val loggedSensorState: Flow<Float>
+        get() = blu.sensorState.onEach {
+            //sensor reading will be streamed sometimes
+            //so logging them all is not a good idea
+            //Timber.log(LogContract.Log.Level.APPLICATION, "Sensor reading: $it")
         }
 
     override fun release() {

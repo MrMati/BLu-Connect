@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_package = "pl.mati.blu.serialization";
+option java_multiple_files = true;
+
+import "auto_modes.proto";
+
+message SensorOptions {
+  uint32 zero_point = 1;
+  uint32 avg_window = 2;
+  float scale = 3;
+}
+
+message AutoOptions {
+  oneof activate {
+    AutoMode activate_mode = 1;
+    uint32 activate_slotted_mode = 2;
+  }
+
+  repeated AutoMode slot_modes = 3;
+}

@@ -34,9 +34,9 @@ class BLuViewModel @Inject constructor(
     /** The LED state. */
     val ledState = repository.loggedLedState
         .stateIn(viewModelScope, SharingStarted.Lazily, false)
-    /** The button state. */
-    val buttonState = repository.loggedButtonState
-        .stateIn(viewModelScope, SharingStarted.Lazily, false)
+    /** The sensor state. */
+    val sensorState = repository.loggedSensorState
+        .stateIn(viewModelScope, SharingStarted.Lazily, 0.0F)
 
     init {
         // In this sample we want to connect to the device as soon as the view model is created.

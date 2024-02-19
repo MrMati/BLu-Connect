@@ -12,7 +12,7 @@ import no.nordicsemi.android.common.theme.NordicTheme
 @Composable
 internal fun BLuControlView(
     ledState: Boolean,
-    buttonState: Boolean,
+    sensorReadingState: Float,
     onStateChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -25,8 +25,8 @@ internal fun BLuControlView(
             onStateChanged = onStateChanged,
         )
 
-        ButtonControlView(
-            state = buttonState
+        SensorReadingView(
+            state = sensorReadingState
         )
     }
 }
@@ -37,7 +37,7 @@ private fun BLuControlViewPreview() {
     NordicTheme {
         BLuControlView(
             ledState = true,
-            buttonState = true,
+            sensorReadingState = 1.0F,
             onStateChanged = {},
             modifier = Modifier.padding(16.dp),
         )

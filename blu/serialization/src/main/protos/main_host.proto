@@ -3,30 +3,13 @@ syntax = "proto3";
 option java_package = "pl.mati.blu.serialization";
 option java_multiple_files = true;
 
-import "auto_modes.proto";
-
 message GetReading {
     uint32 num_samples = 1;
-}
-
-message SetSensorOptions {
-    uint32 zero_point = 1;
-    uint32 avg_window = 2;
-    float scale = 3;
-}
-
-message SetAutoOptions {
-    oneof activate {
-        AutoMode activate_mode = 1;
-        uint32 activate_slotted_mode = 2;
-    }
-
-    repeated AutoMode slot_modes = 3;
 }
 
 
 message SubscribeReading {
     bool enable = 1;
-    uint32 update_rate = 2;
+    uint32 update_rate = 2; //Hz
 }
 
