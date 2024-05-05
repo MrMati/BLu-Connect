@@ -22,7 +22,7 @@ dependencies {
 
     implementation(libs.androidx.compose.material.iconsExtended)
 
-    implementation("com.patrykandpatrick.vico:compose:1.13.1")
-    implementation("com.patrykandpatrick.vico:compose-m3:1.13.1")
-    implementation("com.patrykandpatrick.vico:core:1.13.1")
+    implementation("com.patrykandpatrick.vico:compose:2.0.0-alpha.8")
+    implementation("com.patrykandpatrick.vico:compose-m3:2.0.0-alpha.8")
+    implementation("com.patrykandpatrick.vico:core:2.0.0-alpha.8")
 }

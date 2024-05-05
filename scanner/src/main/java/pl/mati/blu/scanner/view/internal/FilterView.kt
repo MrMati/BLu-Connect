@@ -61,7 +61,7 @@ internal fun FilterView(
         modifier = modifier,
     ) {
         config.filterUuidRequired?.let {
-            ElevatedFilterChip(
+            /*ElevatedFilterChip(
                 selected = !it,
                 onClick = { onChanged(config.copy(filterUuidRequired = !it)) },
                 label = { Text(text = stringResource(id = R.string.filter_uuid),) },
@@ -73,10 +73,10 @@ internal fun FilterView(
                         Icon(Icons.Default.Widgets, contentDescription = "")
                     }
                 },
-            )
+            )*/
         }
         config.filterNearbyOnly.let {
-            ElevatedFilterChip(
+            /*ElevatedFilterChip(
                 selected = it,
                 onClick = { onChanged(config.copy(filterNearbyOnly = !it)) },
                 label = { Text(text = stringResource(id = R.string.filter_nearby),) },
@@ -88,10 +88,10 @@ internal fun FilterView(
                         Icon(Icons.Default.Wifi, contentDescription = "")
                     }
                 },
-            )
+            )*/
         }
         config.filterWithNames.let {
-            ElevatedFilterChip(
+            /*ElevatedFilterChip(
                 selected = it,
                 onClick = { onChanged(config.copy(filterWithNames = !it)) },
                 label = { Text(text = stringResource(id = R.string.filter_name),) },
@@ -103,7 +103,7 @@ internal fun FilterView(
                         Icon(Icons.Default.Label, contentDescription = "")
                     }
                 },
-            )
+            )*/
         }
     }
 }

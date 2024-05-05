@@ -12,6 +12,7 @@ android {
         resourceConfigurations.add("en")
         minSdk = 33
     }
+
 }
 
 dependencies {

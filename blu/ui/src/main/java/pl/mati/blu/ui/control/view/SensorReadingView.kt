@@ -1,10 +1,5 @@
 package pl.mati.blu.ui.control.view
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,25 +11,28 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.axis.horizontal.rememberBottomAxis
-import com.patrykandpatrick.vico.compose.axis.vertical.rememberStartAxis
-import com.patrykandpatrick.vico.compose.chart.Chart
-import com.patrykandpatrick.vico.compose.chart.line.lineChart
-import com.patrykandpatrick.vico.core.entry.entryModelOf
-import pl.mati.blu.ui.R
+import com.patrykandpatrick.vico.compose.chart.CartesianChartHost
+import com.patrykandpatrick.vico.compose.chart.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.chart.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.style.currentChartStyle
+import com.patrykandpatrick.vico.core.chart.copy
+import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.model.LineCartesianLayerModel
+import com.patrykandpatrick.vico.core.model.lineSeries
 import no.nordicsemi.android.common.theme.NordicTheme
+import pl.mati.blu.ui.R
 
 @Composable
 internal fun SensorReadingView(
-    state: Float,
+    currentSensorVal: Float,
+    chartModelProducer: CartesianChartModelProducer,
     modifier: Modifier = Modifier,
 ) {
     OutlinedCard(
@@ -71,7 +69,7 @@ internal fun SensorReadingView(
                     modifier = Modifier.weight(1f)
                 )
                 Text(
-                    text = state.toString(),
+                    text = currentSensorVal.toString(),
                 )
             }
             Row(
@@ -80,27 +78,37 @@ internal fun SensorReadingView(
                     .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                
+                val defaultLines = currentChartStyle.lineLayer.lines
+                CartesianChartHost(
+                    chart =
+                    rememberCartesianChart(
+                        rememberLineCartesianLayer(
+                            remember(defaultLines) { defaultLines.map { it.copy(backgroundShader = null) } },
+                        ),
+                    ),
+                    modelProducer = chartModelProducer,
 
-
-                val chartEntryModel = entryModelOf(4f, 12f, 8f, 16f)
-                Chart(
-                    chart = lineChart(),
-                    model = chartEntryModel,
-                    startAxis = rememberStartAxis(),
-                    bottomAxis = rememberBottomAxis()
+                    runInitialAnimation = false,
                 )
+
 
             }
         }
     }
 }
 
+
 @Composable
 @Preview
 private fun SensorReadingViewPreview() {
     NordicTheme {
         SensorReadingView(
-            state = 1.0F,
+            currentSensorVal = 18766f,
+            chartModelProducer = CartesianChartModelProducer.build {
+                add(
+                    LineCartesianLayerModel.partial { series((0..4).toList())})
+            },
             modifier = Modifier.padding(16.dp),
         )
     }

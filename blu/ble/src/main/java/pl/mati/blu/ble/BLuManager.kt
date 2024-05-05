@@ -154,7 +154,7 @@ private class BLuManagerImpl(
         //val reqRead = getReading { numSamples = 1 }
         val reqRead = subscribeReading {
             enable = true
-            updateRate = 1
+            updateRate = 3
         }
 
         scope.launch {

@@ -61,10 +61,12 @@ internal fun BLuControlScreen(
                 BLuControl.State.READY -> {
                     val ledState by viewModel.ledState.collectAsStateWithLifecycle()
                     val sensorState by viewModel.sensorState.collectAsStateWithLifecycle()
+                    val sensorChartProducer = viewModel.sensorChartDataProducer
 
                     BLuControlView(
                         ledState = ledState,
-                        sensorReadingState = sensorState,
+                        currentSensorVal = sensorState,
+                        sensorChartProducer = sensorChartProducer,
                         onStateChanged = { viewModel.turnLed(it) },
                         modifier = Modifier
                             .widthIn(max = 460.dp)

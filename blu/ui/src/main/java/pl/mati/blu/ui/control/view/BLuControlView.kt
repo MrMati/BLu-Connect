@@ -7,12 +7,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.core.model.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.model.LineCartesianLayerModel
 import no.nordicsemi.android.common.theme.NordicTheme
 
 @Composable
 internal fun BLuControlView(
     ledState: Boolean,
-    sensorReadingState: Float,
+    currentSensorVal: Float,
+    sensorChartProducer: CartesianChartModelProducer,
     onStateChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -26,7 +29,8 @@ internal fun BLuControlView(
         )
 
         SensorReadingView(
-            state = sensorReadingState
+            currentSensorVal = currentSensorVal,
+            chartModelProducer = sensorChartProducer
         )
     }
 }
@@ -37,7 +41,11 @@ private fun BLuControlViewPreview() {
     NordicTheme {
         BLuControlView(
             ledState = true,
-            sensorReadingState = 1.0F,
+            currentSensorVal = 18766f,
+            sensorChartProducer = CartesianChartModelProducer.build {
+                add(
+                    LineCartesianLayerModel.partial { series((0..4).toList())})
+            },
             onStateChanged = {},
             modifier = Modifier.padding(16.dp),
         )
